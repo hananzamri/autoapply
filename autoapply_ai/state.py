@@ -134,7 +134,7 @@ class State(rx.State):
     # ========================================================
     # GENERATED ASSETS
     # ========================================================
-    generated_resume: str = ""
+    generated_resume: dict = {}
     generated_cover_letter: str   = ""
     critic_score:           float = 0.0
     ready_to_apply:         bool  = False
@@ -356,13 +356,16 @@ class State(rx.State):
     
 
     def download_resume_docx(self):
-        data = export_docx(
-            f"{self.pipeline_role}_Resume",
+        from autoapply_ai.services.export import export_docx
+
+        docx = export_docx(
+            f"{self.pipeline_role} Resume",
             self.generated_resume,
-        )   
+        )
+
         return rx.download(
-            data=data,
-            filename=f"{self.pipeline_role}_Resume.docx",
+            data=docx,
+            filename=f"{self.pipeline_company}_resume.docx",
         )
     
     
