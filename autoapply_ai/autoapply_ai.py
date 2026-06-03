@@ -1,17 +1,16 @@
-"""autoapply/autoapply.py — App setup and page registration."""
+"""autoapply/autoapply_ai.py — App setup and page registration."""
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv()  # no-op on Reflex Cloud, fine to keep
 
 import reflex as rx
 from autoapply_ai.state import State
 from autoapply_ai.styles import BG, TEXT
-from autoapply_ai.pages.login    import login
-from autoapply_ai.pages.tracker  import tracker
+from autoapply_ai.pages.login     import login
+from autoapply_ai.pages.tracker   import tracker
 from autoapply_ai.pages.new_apply import new_apply
 from autoapply_ai.pages.live_feed import live_feed
-from autoapply_ai.pages.assets   import assets
-from autoapply_ai.pages.profile  import profile
-
+from autoapply_ai.pages.assets    import assets
+from autoapply_ai.pages.profile   import profile
 
 # ── App instance ─────────────────────────────────────────────
 
@@ -35,28 +34,24 @@ app.add_page(
     route="/login",
     title="AutoApply AI — Sign In",
 )
-
 app.add_page(
     tracker,
     route="/",
     title="AutoApply AI — Dashboard",
     on_load=State.guard_and_load,
 )
-
 app.add_page(
     new_apply,
     route="/apply",
     title="AutoApply AI — New Application",
     on_load=State.guard,
 )
-
 app.add_page(
     live_feed,
     route="/feed",
     title="AutoApply AI — Live Feed",
     on_load=State.guard,
 )
-
 app.add_page(
     assets,
     route="/assets",

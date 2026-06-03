@@ -1,31 +1,38 @@
 """
 autoapply/services/ai_service.py
 All OpenRouter / LLM calls for the multi-agent pipeline.
+
+FIX: API_KEY and HEADERS were built at import time, so the key was always
+     an empty string on Reflex Cloud (env vars not yet loaded). Moved inside
+     the _call() function so they're read fresh on every request.
 """
 from __future__ import annotations
 import os, json, re
 import httpx
 
-API_KEY  = os.getenv("OPENROUTER_API_KEY", "")
 BASE_URL = "https://openrouter.ai/api/v1"
-MODEL    = "anthropic/claude-3.5-haiku"          # fast, cheap, capable
-HEADERS  = {
-    "Authorization":  f"Bearer {API_KEY}",
-    "Content-Type":   "application/json",
-    "HTTP-Referer":   "https://autoapply.ai",
-    "X-Title":        "AutoApply AI",
-}
+MODEL    = "anthropic/claude-3.5-haiku"
+
 
 # ── low-level caller ─────────────────────────────────────────
 
-
 async def _call(messages: list[dict], max_tokens: int = 2000) -> str:
-    if not API_KEY:
-        raise RuntimeError("OPENROUTER_API_KEY not set — add it to your .env file")
+    # Read key at call time, not at import time
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+    if not api_key:
+        raise RuntimeError("OPENROUTER_API_KEY not set — add it to Reflex Cloud env vars")
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type":  "application/json",
+        "HTTP-Referer":  "https://autoapply.ai",
+        "X-Title":       "AutoApply AI",
+    }
+
     async with httpx.AsyncClient(timeout=60.0) as client:
         r = await client.post(
             f"{BASE_URL}/chat/completions",
-            headers=HEADERS,
+            headers=headers,
             json={"model": MODEL, "messages": messages, "max_tokens": max_tokens},
         )
         r.raise_for_status()
@@ -45,12 +52,7 @@ def _extract_json(text: str) -> dict:
 
 # ── Agent 1 — Analyzer ───────────────────────────────────────
 
-
 async def analyze_job(company: str, role: str, jd: str) -> dict:
-    """
-    Extract skills, ATS keywords, and culture markers from a job description.
-    Returns a structured dict.
-    """
     prompt = f"""You are an expert ATS and job-description analyzer.
 
 Analyze this job posting for **{role}** at **{company}** and respond ONLY with a valid JSON object (no markdown, no commentary):
@@ -70,7 +72,6 @@ Job Description:
     raw = await _call([{"role": "user", "content": prompt}], max_tokens=1000)
     result = _extract_json(raw)
     if not result:
-        # Fallback: basic keyword extraction
         words = set(jd.lower().split())
         skills = [w for w in ["python","sql","react","typescript","figma","ai","ml",
                                "design","product","data","cloud","api","leadership",
@@ -82,11 +83,9 @@ Job Description:
 
 # ── Agent 2 — Writer ─────────────────────────────────────────
 
-
 async def generate_resume(
     role: str, company: str, jd: str, base_resume: str, analysis: dict
 ) -> str:
-    """Rewrite/tailor the base resume for the specific role."""
     keywords = ", ".join(analysis.get("ats_keywords", [])[:10])
     prompt = f"""You are a senior resume writer specializing in ATS optimization.
 
@@ -112,7 +111,6 @@ Output the tailored resume text directly:"""
 
 
 async def generate_cover_letter(role: str, company: str, jd: str) -> str:
-    """Write a personalised, high-quality cover letter."""
     prompt = f"""You are an expert cover letter writer.
 
 Write a compelling, personalised cover letter for the **{role}** role at **{company}**.
@@ -133,14 +131,9 @@ Write the cover letter (starting with "Dear Hiring Team"):"""
 
 # ── Agent 3 — Critic ─────────────────────────────────────────
 
-
 async def score_application(
     company: str, role: str, jd: str, resume: str, analysis: dict
 ) -> dict:
-    """
-    Score the tailored application 1-10 and provide actionable insights.
-    Returns: {score, keyword_match, keyword_text, edge}
-    """
     keywords = analysis.get("ats_keywords", [])
     prompt = f"""You are a hiring manager and ATS expert evaluating a tailored job application.
 
@@ -165,7 +158,6 @@ Job Description (first 800 chars):
     raw = await _call([{"role": "user", "content": prompt}], max_tokens=300)
     result = _extract_json(raw)
 
-    # Validate
     score = float(result.get("score", 7.5))
     score = max(1.0, min(10.0, score))
     km    = int(result.get("keyword_match", 80))
