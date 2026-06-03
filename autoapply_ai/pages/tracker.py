@@ -88,20 +88,17 @@ def status_badge(status) -> rx.Component:
 
 
 # ── Application row ──────────────────────────────────────────
+
 def app_row(item) -> rx.Component:
     return rx.box(
         rx.hstack(
-
             # Company Avatar
             rx.box(
                 rx.text(
                     item["company"][0],
-                    font_size="15px",
-                    font_weight="700",
-                    color=GOLD,
+                    font_size="15px", font_weight="700", color=GOLD,
                 ),
-                width="44px",
-                height="44px",
+                width="44px", height="44px",
                 border_radius="12px",
                 background=GOLD_BG,
                 border=f"1px solid {GOLD}30",
@@ -110,79 +107,36 @@ def app_row(item) -> rx.Component:
                 justify_content="center",
                 flex_shrink="0",
             ),
-
             # Company + Role
             rx.vstack(
-                rx.text(
-                    item["role"],
-                    font_size="14px",
-                    font_weight="600",
-                    color=WHITE,
-                ),
-
-                rx.text(
-                    item["company"],
-                    font_size="12px",
-                    color=TEXT_MUTED,
-                ),
-
-                rx.text(
-                    item["time_ago"],
-                    font_size="11px",
-                    color=TEXT_FAINT,
-                ),
-
-                spacing="0",
-                align="start",
-                flex="1",
+                rx.text(item["role"], font_size="14px", font_weight="600", color=WHITE),
+                rx.text(item["company"], font_size="12px", color=TEXT_MUTED),
+                rx.text(item["time_ago"], font_size="11px", color=TEXT_FAINT),
+                spacing="0", align="start", flex="1",
             ),
-
             rx.spacer(),
-
-            # Right side controls
+            # Status + selector
             rx.vstack(
-
                 status_badge(item["status"]),
-
                 rx.select(
-                    [
-                        "submitted",
-                        "interviewing",
-                        "offer",
-                        "rejected",
-                    ],
+                    ["submitted", "interviewing", "offer", "rejected"],
                     value=item["status"],
-                    on_change=lambda status: State.update_app_status(
-                        item["id"],
-                        status,
-                    ),
+                    on_change=lambda status: State.update_app_status(item["id"], status),
                     size="1",
                     width="130px",
                 ),
-
-                spacing="2",
-                align="end",
+                spacing="2", align="end",
             ),
-
-            width="100%",
-            align="center",
+            width="100%", align="center",
         ),
-
         padding="16px",
         border_bottom=f"1px solid {BORDER}",
-
         transition="all 0.15s ease",
-
-        _hover={
-            "background": SURFACE_2,
-        },
-
-        _last={
-            "border_bottom": "none",
-        },
-
+        _hover={"background": SURFACE_2},
+        _last={"border_bottom": "none"},
         width="100%",
     )
+
 
 # ── Empty state ──────────────────────────────────────────────
 
@@ -208,8 +162,7 @@ def empty_applications() -> rx.Component:
                 rx.hstack(
                     rx.icon("plus", size=16),
                     rx.text("New Application"),
-                    spacing="2",
-                    align="center",
+                    spacing="2", align="center",
                 ),
                 on_click=rx.redirect("/apply"),
                 style=BTN_GOLD,
@@ -225,119 +178,100 @@ def empty_applications() -> rx.Component:
 # ── Page ─────────────────────────────────────────────────────
 
 def tracker() -> rx.Component:
-    return layout(
-        # ── Header ───────────────────────────────────────────
-        rx.hstack(
-            rx.vstack(
-                rx.hstack(
-                    rx.text("Hi, ", font_size="26px", font_weight="700", color=WHITE),
-                    rx.link(
-                        rx.text(State.display_name, font_size="26px", font_weight="700", color=GOLD),
-                        href="/profile",
-                    ),
-                    rx.text("👋", font_size="22px"),
-                    spacing="1", align="center",
-                ),
-                rx.text(
-                    "Here's your application command centre",
-                    font_size="14px", color=TEXT_MUTED,
-                ),
-                spacing="1", align="start",
-            ),
-            rx.spacer(),
-            rx.button(
-                rx.hstack(
-                    rx.icon("log-out", size=15),
-                    rx.text("Logout", font_size="13px"),
-                    spacing="2", align="center",
-                ),
-                on_click=State.logout,
-                style=BTN_GHOST,
-                padding="9px 16px",
-            ),
-            width="100%",
-            align="center",
-            margin_bottom="28px",
-        ),
-
-        # ── Stat cards ───────────────────────────────────────
-        rx.hstack(
-            stat_card(
-                "send",       State.total_applied,    "Applications Sent",
-                "+2 this week", GOLD,    GOLD,
-            ),
-            stat_card(
-                "calendar",   State.total_interviews, "Interviews",
-                "In progress",  BLUE,    BLUE,
-            ),
-            stat_card(
-                "award",      State.total_offers,     "Offers",
-                "Pending reply", SUCCESS, SUCCESS,
-            ),
-            spacing="4",
-            width="100%",
-            margin_bottom="28px",
-            wrap="wrap",
-        ),
-
-        # ── Recent applications ──────────────────────────────
-        rx.box(
-            # Section header
+    return rx.cond(
+        # Show nothing until we know the auth state — prevents dashboard flash
+        State.is_logged_in,
+        layout(
+            # ── Header ───────────────────────────────────────────
             rx.hstack(
                 rx.vstack(
-                    rx.text(
-                        "Recent Applications",
-                        font_size="16px", font_weight="600", color=WHITE,
+                    rx.hstack(
+                        rx.text("Hi, ", font_size="26px", font_weight="700", color=WHITE),
+                        rx.link(
+                            rx.text(State.display_name, font_size="26px", font_weight="700", color=GOLD),
+                            href="/profile",
+                        ),
+                        rx.text("👋", font_size="22px"),
+                        spacing="1", align="center",
                     ),
                     rx.text(
-                        State.total_applied.to_string() + " total",
-                        font_size="12px", color=TEXT_MUTED,
+                        "Here's your application command centre",
+                        font_size="14px", color=TEXT_MUTED,
                     ),
-                    spacing="0",
+                    spacing="1", align="start",
                 ),
                 rx.spacer(),
                 rx.button(
                     rx.hstack(
-                        rx.icon("plus", size=15),
-                        rx.text("New", font_size="13px"),
-                        spacing="1", align="center",
-                    ),
-                    on_click=rx.redirect("/apply"),
-                    style=BTN_OUTLINE,
-                    padding="8px 16px",
-                ),
-                width="100%",
-                align="center",
-                margin_bottom="0",
-                padding="16px 16px 0 16px",
-            ),
-
-            # List
-            rx.cond(
-                State.loading_apps,
-                rx.center(
-                    rx.hstack(
-                        rx.icon("loader", size=18, color=TEXT_MUTED, class_name="spin"),
-                        rx.text("Loading…", color=TEXT_MUTED, font_size="13px"),
+                        rx.icon("log_out", size=15),  # FIX: was "log-out"
+                        rx.text("Logout", font_size="13px"),
                         spacing="2", align="center",
                     ),
-                    padding="48px",
+                    on_click=State.logout,
+                    style=BTN_GHOST,
+                    padding="9px 16px",
                 ),
-                rx.cond(
-                    State.has_applications,
-                    rx.vstack(
-                        rx.foreach(State.applications, app_row),
-                        spacing="0",
-                        width="100%",
-                        padding_top="8px",
-                    ),
-                    empty_applications(),
-                ),
+                width="100%", align="center", margin_bottom="28px",
             ),
 
-            background=SURFACE,
-            border=f"1px solid {BORDER}",
-            border_radius="14px",
-            overflow="hidden",
+            # ── Stat cards ───────────────────────────────────────
+            rx.hstack(
+                stat_card("send",     State.total_applied,    "Applications Sent", "+2 this week",  GOLD,    GOLD),
+                stat_card("calendar", State.total_interviews, "Interviews",        "In progress",   BLUE,    BLUE),
+                stat_card("award",    State.total_offers,     "Offers",            "Pending reply", SUCCESS, SUCCESS),
+                spacing="4", width="100%", margin_bottom="28px", wrap="wrap",
+            ),
+
+            # ── Recent applications ──────────────────────────────
+            rx.box(
+                rx.hstack(
+                    rx.vstack(
+                        rx.text("Recent Applications", font_size="16px", font_weight="600", color=WHITE),
+                        rx.text(
+                            State.total_applied.to_string() + " total",
+                            font_size="12px", color=TEXT_MUTED,
+                        ),
+                        spacing="0",
+                    ),
+                    rx.spacer(),
+                    rx.button(
+                        rx.hstack(
+                            rx.icon("plus", size=15),
+                            rx.text("New", font_size="13px"),
+                            spacing="1", align="center",
+                        ),
+                        on_click=rx.redirect("/apply"),
+                        style=BTN_OUTLINE,
+                        padding="8px 16px",
+                    ),
+                    width="100%", align="center",
+                    margin_bottom="0", padding="16px 16px 0 16px",
+                ),
+                rx.cond(
+                    State.loading_apps,
+                    rx.center(
+                        rx.hstack(
+                            rx.icon("loader", size=18, color=TEXT_MUTED, class_name="spin"),
+                            rx.text("Loading…", color=TEXT_MUTED, font_size="13px"),
+                            spacing="2", align="center",
+                        ),
+                        padding="48px",
+                    ),
+                    rx.cond(
+                        State.has_applications,
+                        rx.vstack(
+                            rx.foreach(State.applications, app_row),
+                            spacing="0", width="100%", padding_top="8px",
+                        ),
+                        empty_applications(),
+                    ),
+                ),
+                background=SURFACE,
+                border=f"1px solid {BORDER}",
+                border_radius="14px",
+                overflow="hidden",
+            ),
         ),
+        # Not logged in — show blank while guard redirect fires
+        rx.box(background=BG, min_height="100vh"),
     )

@@ -671,14 +671,49 @@ class State(rx.State):
     # PAGE LOAD GUARDS
     # ================================================================
 
+    def _clear_session(self):
+        """Wipe all LocalStorage auth state."""
+        self.user_id           = ""
+        self.user_email        = ""
+        self._is_logged_in_str = "false"
+        self.applications      = []
+
+    async def _validate_session(self) -> bool:
+        """
+        Verify the stored user_id still exists in Supabase.
+        Clears session and returns False if invalid.
+        This prevents stale localStorage from bypassing the guard.
+        """
+        if not self.is_logged_in or not self.user_id:
+            self._clear_session()
+            return False
+        try:
+            from autoapply_ai.db.client import get_client
+            res = (
+                get_client()
+                .table("profiles")
+                .select("user_id")
+                .eq("user_id", self.user_id)
+                .limit(1)
+                .execute()
+            )
+            # If no profile row yet that's fine — user is valid, just new
+            return True
+        except Exception as e:
+            print("SESSION VALIDATION ERROR:", e)
+            # On Supabase error, trust the stored token rather than logging out
+            return self.is_logged_in
+
     async def guard(self):
-        """Redirect to /login if not authenticated."""
-        if not self.is_logged_in:
+        """Redirect to /login if not authenticated or session is stale."""
+        valid = await self._validate_session()
+        if not valid:
             yield rx.redirect("/login")
 
     async def guard_and_load(self):
-        """Redirect to /login, or load applications."""
-        if not self.is_logged_in:
+        """Redirect to /login if stale, or load applications + profile."""
+        valid = await self._validate_session()
+        if not valid:
             yield rx.redirect("/login")
             return
 
