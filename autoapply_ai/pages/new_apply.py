@@ -104,7 +104,7 @@ def new_apply() -> rx.Component:
             State.form_error != "",
             rx.box(
                 rx.hstack(
-                    rx.icon("alert-circle", size=15, color=ERROR),
+                    rx.icon("circle_alert", size=15, color=ERROR),  # FIX: was "alert-circle"
                     rx.text(State.form_error, font_size="13px", color=ERROR),
                     spacing="2", align="center",
                 ),
@@ -178,7 +178,7 @@ def new_apply() -> rx.Component:
 
                 rx.button(
                     "Upload Resume",
-                    on_click=State.process_upload(
+                    on_click=State.handle_resume_upload(  # FIX: was process_upload
                         rx.upload_files(upload_id="resume_upload")
                     ),
                 ),
@@ -255,7 +255,7 @@ def new_apply() -> rx.Component:
                         rx.hstack(
                             rx.icon("sparkles", size=15),
                             rx.text("Start AI Scan", font_size="14px"),
-                            rx.icon("arrow-right", size=14),
+                            rx.icon("arrow_right", size=14),  # FIX: was "arrow-right"
                             spacing="2", align="center",
                         ),
                         on_click=State.start_pipeline,
@@ -287,7 +287,7 @@ def new_apply() -> rx.Component:
                 GOLD,
             ),
             hint_card(
-                "building-2", "Culture Analysis",
+                "building_2", "Culture Analysis",  # FIX: was "building-2"
                 "Maps company values and team dynamics to your application style",
                 BLUE,
             ),
