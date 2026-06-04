@@ -11,9 +11,6 @@ import reflex as rx
 from docx import Document
 from pypdf import PdfReader
 
-from autoapply_ai.db.history import save_application
-from autoapply_ai.services.export import export_docx
-
 
 class State(rx.State):
 
@@ -177,21 +174,21 @@ class State(rx.State):
     # INPUT SETTERS
     # ================================================================
 
-    def set_login_email(self, value: str):       self.login_email    = value
-    def set_login_password(self, value: str):    self.login_password = value
-    def set_company(self, value: str):           self.company        = value
-    def set_role(self, value: str):              self.role           = value
-    def set_job_description(self, value: str):   self.job_description = value
-    def set_resume_text(self, value: str):       self.resume_text    = value
-    def set_profile_name(self, value: str):      self.profile_name   = value
-    def set_headline(self, value: str):          self.headline       = value
-    def set_location(self, value: str):          self.location       = value
-    def set_bio(self, value: str):               self.bio            = value
-    def set_skills(self, value: str):            self.skills         = value
-    def set_education(self, value: str):         self.education      = value
-    def set_experience(self, value: str):        self.experience     = value
-    def set_github_url(self, value: str):        self.github_url     = value
-    def set_linkedin_url(self, value: str):      self.linkedin_url   = value
+    def set_login_email(self, value: str):      self.login_email     = value
+    def set_login_password(self, value: str):   self.login_password  = value
+    def set_company(self, value: str):          self.company         = value
+    def set_role(self, value: str):             self.role            = value
+    def set_job_description(self, value: str):  self.job_description = value
+    def set_resume_text(self, value: str):      self.resume_text     = value
+    def set_profile_name(self, value: str):     self.profile_name    = value
+    def set_headline(self, value: str):         self.headline        = value
+    def set_location(self, value: str):         self.location        = value
+    def set_bio(self, value: str):              self.bio             = value
+    def set_skills(self, value: str):           self.skills          = value
+    def set_education(self, value: str):        self.education       = value
+    def set_experience(self, value: str):       self.experience      = value
+    def set_github_url(self, value: str):       self.github_url      = value
+    def set_linkedin_url(self, value: str):     self.linkedin_url    = value
 
     # ================================================================
     # AUTH HANDLERS
@@ -413,6 +410,7 @@ class State(rx.State):
                 self.form_error = "Session expired. Please login again."
                 yield rx.redirect("/login")
                 return
+            from autoapply_ai.db.history import save_application
             app_id = save_application(
                 user_id=self.user_id,
                 company=self.pipeline_company,
@@ -481,10 +479,12 @@ class State(rx.State):
     # ================================================================
 
     def download_resume_docx(self):
+        from autoapply_ai.services.export import export_docx
         docx = export_docx(f"{self.pipeline_role} Resume", self.generated_resume)
         return rx.download(data=docx, filename=f"{self.pipeline_company}_resume.docx")
 
     def download_cover_letter_docx(self):
+        from autoapply_ai.services.export import export_docx
         docx = export_docx(f"{self.pipeline_role} Cover Letter", self.generated_cover_letter)
         return rx.download(data=docx, filename=f"{self.pipeline_company}_cover_letter.docx")
 
