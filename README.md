@@ -2,7 +2,7 @@
 
 AI-powered job application assistant that tailors resumes, generates cover letters, scores applications, and tracks your entire job search — all in one place.
 
-![Dashboard](assets/dashboard.png)
+![Dashboard](assets/tracker.png)
 
 ---
 
@@ -32,17 +32,20 @@ AutoApply AI removes the manual work from job applications. Upload your resume, 
 
 ## Screenshots
 
+### login
+![Dashboard](assets/login.png)
+
 ### Dashboard
-![Dashboard](assets/dashboard.png)
+![Dashboard](assets/tracker.png)
 
 ### New Application
-![New Apply](assets/apply-page.png)
+![New Apply](assets/new-app;y.png)
 
 ### Live Pipeline Feed
-![Live Feed](assets/live-feed.png)
+![Live Feed](assets/live-pipeline.png)
 
 ### Application Tracker
-![Tracker](assets/tracker.png)
+![Tracker](assets/assets.png)
 
 ---
 
