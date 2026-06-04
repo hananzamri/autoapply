@@ -123,11 +123,6 @@ Open [http://localhost:3000](http://localhost:3000)
 - [x] ATS keyword scoring
 - [x] Application tracker
 - [x] DOCX export
-- [ ] Job board integration
-- [ ] LinkedIn import
-- [ ] Interview preparation assistant
-- [ ] Multi-resume management
-- [ ] Analytics dashboard
 
 ---
 
