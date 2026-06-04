@@ -1,215 +1,141 @@
 # AutoApply AI
 
-AI-powered job application assistant that helps candidates tailor resumes, generate cover letters, track applications, and manage their job search workflow in one place.
+AI-powered job application assistant that tailors resumes, generates cover letters, scores applications, and tracks your entire job search — all in one place.
 
 ![Dashboard](assets/dashboard.png)
 
 ---
 
+## Live Demo
+
+🔗 [https://autoapply-ai-teal-book.reflex.run](https://autoapply-ai-teal-book.reflex.run)
+
+---
+
 ## Overview
 
-AutoApply AI streamlines the job application process by combining resume optimization, cover letter generation, and application tracking into a single platform.
-
-Instead of manually rewriting documents for every role, users can upload an existing resume, provide a target company and position, and generate tailored application materials in seconds.
+AutoApply AI removes the manual work from job applications. Upload your resume, paste a job description, and a 3-agent AI pipeline will extract keywords, tailor your documents, and score your application against ATS standards — in seconds.
 
 ---
 
 ## Features
 
-### Resume Tailoring
-
-* Upload PDF, DOC, DOCX, or TXT resumes
-* Extract and analyze resume content
-* Generate role-specific resume versions
-* Export professional PDF and DOCX formats
-
-### Cover Letter Generation
-
-* AI-generated personalized cover letters
-* Company and role specific customization
-* Professional business format
-* Download-ready PDF and DOCX exports
-
-### Application Tracker
-
-* Track submitted applications
-* Update application status
-* Manage interview progress
-* Monitor offers and outcomes
-
-### Dashboard Analytics
-
-* Total applications overview
-* Interview tracking
-* Offer statistics
-* Recent application activity
-
-### Modern UI
-
-* Responsive design
-* Light and dark theme support
-* Clean dashboard experience
-* Optimized workflow navigation
+- **Resume Tailoring** — Upload PDF or DOCX, get a role-specific version with ATS keywords injected
+- **Cover Letter Generation** — Personalised cover letters based on the company and job description
+- **3-Agent AI Pipeline** — Analyzer → Writer → Critic pipeline with live progress feed
+- **ATS Scoring** — Application scored out of 10 with keyword match percentage and competitive edge analysis
+- **Application Tracker** — Track status across submitted, interviewing, offer, and rejected stages
+- **Dashboard Analytics** — Total applications, interviews, and offers at a glance
+- **Export** — Download tailored resume and cover letter as DOCX
 
 ---
 
 ## Screenshots
 
 ### Dashboard
-
 ![Dashboard](assets/dashboard.png)
 
-### Resume Generator
+### New Application
+![New Apply](assets/apply-page.png)
 
-![Resume Generator](assets/apply-page.png)
+### Live Pipeline Feed
+![Live Feed](assets/live-feed.png)
 
 ### Application Tracker
-
 ![Tracker](assets/tracker.png)
 
 ---
 
-## Demo
+## Tech Stack
 
-![Demo](assets/demo.gif)
-
-Or watch the full demo:
-
-https://your-demo-link-here
-
----
-
-## Technology Stack
-
-### Frontend
-
-* Reflex
-* Python
-* Radix UI Components
-
-### Backend
-
-* Python
-* Reflex State Management
-
-### Document Processing
-
-* PyPDF2
-* python-docx
-* ReportLab
-
-### AI Integration
-
-* OpenAI API
+| Layer | Technology |
+|---|---|
+| Frontend | Reflex, Python, Radix UI |
+| Backend | Python, Reflex State |
+| AI | OpenRouter API (Claude 3.5 Haiku) |
+| Database | Supabase (PostgreSQL + Auth) |
+| Documents | pypdf, python-docx, ReportLab |
 
 ---
 
 ## Project Structure
 
-```text
+```
 autoapply_ai/
-│
 ├── pages/
-│   ├── dashboard.py
+│   ├── login.py
 │   ├── tracker.py
+│   ├── new_apply.py
+│   ├── live_feed.py
 │   ├── assets.py
-│
+│   └── profile.py
 ├── components/
 │   ├── layout.py
-│   ├── bottom_nav.py
-│
+│   └── bottom_nav.py
+├── db/
+│   ├── client.py
+│   └── history.py
 ├── services/
-│   ├── export.py
-│   ├── pdf_generator.py
-│
+│   ├── ai_service.py
+│   └── export.py
 ├── state.py
 ├── styles.py
-└── rxconfig.py
+└── autoapply_ai.py
 ```
 
 ---
 
 ## Installation
 
-Clone the repository:
-
 ```bash
-git clone https://github.com/hananzamri/autoapply.git
-cd autoapply
-```
-
-Create a virtual environment:
-
-```bash
+git clone https://github.com/hananzamri/autoapply-ai.git
+cd autoapply-ai
 python -m venv venv
 source venv/bin/activate
-```
-
-Install dependencies:
-
-```bash
 pip install -r requirements.txt
 ```
 
-Create environment variables:
-
-```bash
-cp .env.example .env
-```
-
-Configure:
+Create a `.env` file:
 
 ```env
-OPENAI_API_KEY=your_api_key
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-anon-key
+OPENROUTER_API_KEY=your-openrouter-key
 ```
 
-Run the application:
+Run locally:
 
 ```bash
 reflex run
 ```
 
-Application will be available at:
-
-```text
-http://localhost:3000
-```
+Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
 ## Roadmap
 
-### Current
-
-* Resume tailoring
-* Cover letter generation
-* PDF export
-* DOCX export
-* Application tracker
-
-### Upcoming
-
-* ATS compatibility scoring
-* Keyword gap analysis
-* Job board integration
-* LinkedIn integration
-* Interview preparation assistant
-* Multi-resume management
-* Analytics dashboard
+- [x] Resume tailoring
+- [x] Cover letter generation
+- [x] ATS keyword scoring
+- [x] Application tracker
+- [x] DOCX export
+- [ ] Job board integration
+- [ ] LinkedIn import
+- [ ] Interview preparation assistant
+- [ ] Multi-resume management
+- [ ] Analytics dashboard
 
 ---
 
+## Author
 
-Nur Hanan Mohammad Zamri
-
-Artificial Intelligence & Data Science
-
-Sejong University
-
-LinkedIn: https://linkedin.com/in/nurhanan
+**Nur Hanan Mohammad Zamri**  
+Artificial Intelligence & Data Science — Sejong University  
+[linkedin.com/in/nurhanan](https://linkedin.com/in/nurhanan)
 
 ---
 
 ## License
 
-This project is licensed under the MIT License.
+MIT License
