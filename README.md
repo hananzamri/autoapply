@@ -6,9 +6,10 @@ AI-powered job application assistant that tailors resumes, generates cover lette
 
 ---
 
-## Live Demo
+## Demo
 
 🔗 [https://autoapply-ai-teal-book.reflex.run](https://autoapply-ai-teal-book.reflex.run)
+📹 ![Demo Video](assets/website.mov)
 
 ---
 
@@ -33,7 +34,7 @@ AutoApply AI removes the manual work from job applications. Upload your resume, 
 ## Screenshots
 
 ### login
-![Dashboard](assets/login.png)
+![Login](assets/login.png)
 
 ### Dashboard
 ![Dashboard](assets/tracker.png)
