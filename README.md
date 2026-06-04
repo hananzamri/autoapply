@@ -40,7 +40,7 @@ AutoApply AI removes the manual work from job applications. Upload your resume, 
 ![Dashboard](assets/tracker.png)
 
 ### New Application
-![New Apply](assets/new-app;y.png)
+![New Apply](assets/new-apply.png)
 
 ### Live Pipeline Feed
 ![Live Feed](assets/live-pipeline.png)
