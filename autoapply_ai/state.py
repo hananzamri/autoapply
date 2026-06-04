@@ -1,11 +1,6 @@
 """
 autoapply/state.py
 Single unified Reflex state for the entire app.
-
-KEY FIX: rx.LocalStorage only supports str values.
-  - is_logged_in stored as str "true"/"false" in LocalStorage
-  - is_logged_in_bool computed var converts it to actual bool for all logic
-  - All guards and checks use self.is_logged_in_bool
 """
 from __future__ import annotations
 
@@ -16,7 +11,6 @@ import reflex as rx
 from docx import Document
 from pypdf import PdfReader
 
-from autoapply_ai.db.client import get_client
 from autoapply_ai.db.history import save_application
 from autoapply_ai.services.export import export_docx
 
@@ -24,14 +18,12 @@ from autoapply_ai.services.export import export_docx
 class State(rx.State):
 
     # ================================================================
-    # AUTH  — all three stored as str because LocalStorage requires str
+    # AUTH  — stored as str because LocalStorage requires str
     # ================================================================
-    user_id:          str = rx.LocalStorage("")
-    user_email:       str = rx.LocalStorage("")
-    # "true" or "false" — never a real bool here
+    user_id:           str = rx.LocalStorage("")
+    user_email:        str = rx.LocalStorage("")
     _is_logged_in_str: str = rx.LocalStorage("false")
 
-    # Ephemeral auth form fields
     auth_loading:   bool = False
     auth_error:     str  = ""
     login_email:    str  = ""
@@ -39,7 +31,7 @@ class State(rx.State):
     is_signup:      bool = False
 
     # ================================================================
-    # PROFILE PAGE
+    # PROFILE
     # ================================================================
     profile_name: str = ""
     headline:     str = ""
@@ -114,7 +106,6 @@ class State(rx.State):
 
     @rx.var
     def is_logged_in(self) -> bool:
-        """True bool derived from the LocalStorage string."""
         return self._is_logged_in_str == "true"
 
     @rx.var
@@ -186,50 +177,21 @@ class State(rx.State):
     # INPUT SETTERS
     # ================================================================
 
-    def set_login_email(self, value: str):
-        self.login_email = value
-
-    def set_login_password(self, value: str):
-        self.login_password = value
-
-    def set_company(self, value: str):
-        self.company = value
-
-    def set_role(self, value: str):
-        self.role = value
-
-    def set_job_description(self, value: str):
-        self.job_description = value
-
-    def set_resume_text(self, value: str):
-        self.resume_text = value
-
-    def set_profile_name(self, value: str):
-        self.profile_name = value
-
-    def set_headline(self, value: str):
-        self.headline = value
-
-    def set_location(self, value: str):
-        self.location = value
-
-    def set_bio(self, value: str):
-        self.bio = value
-
-    def set_skills(self, value: str):
-        self.skills = value
-
-    def set_education(self, value: str):
-        self.education = value
-
-    def set_experience(self, value: str):
-        self.experience = value
-
-    def set_github_url(self, value: str):
-        self.github_url = value
-
-    def set_linkedin_url(self, value: str):
-        self.linkedin_url = value
+    def set_login_email(self, value: str):       self.login_email    = value
+    def set_login_password(self, value: str):    self.login_password = value
+    def set_company(self, value: str):           self.company        = value
+    def set_role(self, value: str):              self.role           = value
+    def set_job_description(self, value: str):   self.job_description = value
+    def set_resume_text(self, value: str):       self.resume_text    = value
+    def set_profile_name(self, value: str):      self.profile_name   = value
+    def set_headline(self, value: str):          self.headline       = value
+    def set_location(self, value: str):          self.location       = value
+    def set_bio(self, value: str):               self.bio            = value
+    def set_skills(self, value: str):            self.skills         = value
+    def set_education(self, value: str):         self.education      = value
+    def set_experience(self, value: str):        self.experience     = value
+    def set_github_url(self, value: str):        self.github_url     = value
+    def set_linkedin_url(self, value: str):      self.linkedin_url   = value
 
     # ================================================================
     # AUTH HANDLERS
@@ -244,15 +206,14 @@ class State(rx.State):
         yield
         try:
             from autoapply_ai.db.client import supabase_login
-
             result = supabase_login(self.login_email, self.login_password)
             if result:
-                self.user_id             = result["user_id"]
-                self.user_email          = result["email"]
-                self._is_logged_in_str   = "true"   # ← str, not bool
-                self.login_email         = ""
-                self.login_password      = ""
-                self.active_tab          = "tracker"
+                self.user_id           = result["user_id"]
+                self.user_email        = result["email"]
+                self._is_logged_in_str = "true"
+                self.login_email       = ""
+                self.login_password    = ""
+                self.active_tab        = "tracker"
                 yield rx.redirect("/")
             else:
                 self.auth_error = "Invalid credentials — please try again."
@@ -272,12 +233,11 @@ class State(rx.State):
         yield
         try:
             from autoapply_ai.db.client import supabase_signup
-
             result = supabase_signup(self.login_email, self.login_password)
             if result:
                 self.user_id           = result["user_id"]
                 self.user_email        = result["email"]
-                self._is_logged_in_str = "true"     # ← str, not bool
+                self._is_logged_in_str = "true"
                 self.login_email       = ""
                 self.login_password    = ""
                 self.active_tab        = "tracker"
@@ -294,13 +254,12 @@ class State(rx.State):
 
     def logout(self):
         from autoapply_ai.db.client import supabase_logout
-
         supabase_logout()
-        self.user_id             = ""
-        self.user_email          = ""
-        self._is_logged_in_str   = "false"   # ← str, not bool
-        self.applications        = []
-        self.active_tab          = "tracker"
+        self.user_id           = ""
+        self.user_email        = ""
+        self._is_logged_in_str = "false"
+        self.applications      = []
+        self.active_tab        = "tracker"
         return rx.redirect("/login")
 
     # ================================================================
@@ -323,18 +282,15 @@ class State(rx.State):
         if not files:
             self.form_error = "No file uploaded"
             return
-
         file = files[0]
         self.resume_file_name = file.filename
         content: bytes = await file.read()
-
         if file.filename.lower().endswith(".pdf"):
             self.resume_text = self._parse_pdf(content)
         elif file.filename.lower().endswith(".docx"):
             self.resume_text = self._parse_docx(content)
         else:
             self.resume_text = self._parse_txt(content)
-
         self.form_error = ""
         print("UPLOAD SUCCESS:", self.resume_file_name, "chars:", len(self.resume_text))
 
@@ -376,133 +332,87 @@ class State(rx.State):
         self.writer_progress        = 0
         self.form_error             = ""
         self.active_tab             = "feed"
-
         yield rx.redirect("/feed")
 
-        # ── STEP 1 · ANALYZER ─────────────────────────────────────
+        # ── STEP 1 · ANALYZER ────────────────────────────────────
         analysis: dict = {}
         try:
             from autoapply_ai.services.ai_service import analyze_job
-
-            analysis = await analyze_job(
-                self.pipeline_company, self.pipeline_role, self.job_description
-            )
+            analysis = await analyze_job(self.pipeline_company, self.pipeline_role, self.job_description)
             kws    = analysis.get("ats_keywords", [])[:6]
             tech   = analysis.get("technical_skills", [])[:3]
             merged = list({s.lower(): s for s in kws + tech}.values())[:6]
             self.extracted_skills = merged
-            top2   = " and ".join(merged[:2]) if len(merged) >= 2 else ", ".join(merged)
-            self.analyzer_msg = (
-                f"Extracted {len(merged)} key skills including {top2}"
-                if merged
-                else "Requirements extracted from job description"
-            )
+            top2 = " and ".join(merged[:2]) if len(merged) >= 2 else ", ".join(merged)
+            self.analyzer_msg = f"Extracted {len(merged)} key skills including {top2}" if merged else "Requirements extracted from job description"
         except Exception:
             self.extracted_skills = ["Technical Skills", "Communication", "Problem Solving"]
             self.analyzer_msg     = "Key requirements extracted from job description"
             analysis              = {}
-
         self.analyzer_status = "complete"
         yield
         await asyncio.sleep(0.7)
 
-        # ── STEP 2 · WRITER ───────────────────────────────────────
+        # ── STEP 2 · WRITER ──────────────────────────────────────
         self.writer_status   = "processing"
         self.writer_msg      = f"Injecting keywords for {self.pipeline_role} role…"
         self.writer_progress = 15
         yield
-
         try:
             from autoapply_ai.services.ai_service import generate_cover_letter, generate_resume
-
             await asyncio.sleep(0.3)
             self.writer_msg      = f"Tailoring résumé for {self.pipeline_company}…"
             self.writer_progress = 45
             yield
-
-            resume = await generate_resume(
-                self.pipeline_role,
-                self.pipeline_company,
-                self.job_description,
-                self.resume_text,
-                analysis,
-            )
+            resume = await generate_resume(self.pipeline_role, self.pipeline_company, self.job_description, self.resume_text, analysis)
             self.generated_resume = resume
             self.writer_progress  = 72
             self.writer_msg       = "Writing personalised cover letter…"
             yield
-
-            cover = await generate_cover_letter(
-                self.pipeline_role, self.pipeline_company, self.job_description
-            )
+            cover = await generate_cover_letter(self.pipeline_role, self.pipeline_company, self.job_description)
             self.generated_cover_letter = cover
             self.writer_progress        = 100
-
         except Exception:
-            self.generated_resume = (
-                self.resume_text
-                or f"Tailored résumé for {self.pipeline_role} at {self.pipeline_company}"
-            )
+            self.generated_resume       = self.resume_text or f"Tailored résumé for {self.pipeline_role} at {self.pipeline_company}"
             self.generated_cover_letter = (
                 f"Dear Hiring Team at {self.pipeline_company},\n\n"
                 f"I am writing to express my strong interest in the {self.pipeline_role} position.\n\n"
-                "My experience aligns closely with your requirements and I am excited "
-                "about the opportunity to contribute to your team.\n\n"
-                "Thank you for your consideration.\n\nBest regards"
+                "My experience aligns closely with your requirements.\n\nThank you for your consideration.\n\nBest regards"
             )
             self.writer_progress = 100
-
         self.writer_status = "complete"
         self.writer_msg    = f"Résumé & cover letter tailored for {self.pipeline_company}"
         yield
         await asyncio.sleep(0.7)
 
-        # ── STEP 3 · CRITIC ───────────────────────────────────────
+        # ── STEP 3 · CRITIC ──────────────────────────────────────
         self.critic_status = "processing"
         self.critic_msg    = "Reviewing document against ATS standards…"
         yield
-
         try:
             from autoapply_ai.services.ai_service import score_application
-
-            s = await score_application(
-                self.pipeline_company,
-                self.pipeline_role,
-                self.job_description,
-                self.generated_resume,
-                analysis,
-            )
+            s = await score_application(self.pipeline_company, self.pipeline_role, self.job_description, self.generated_resume, analysis)
             self.critic_score       = min(float(s.get("score", 8.0)), 10.0)
             self.keyword_match_pct  = min(int(s.get("keyword_match", 85)), 100)
-            self.keyword_match_text = str(s.get("keyword_text", ""))
-            self.competitive_edge   = str(s.get("edge", ""))
+            self.keyword_match_text = str(s.get("keyword_text", "")) or f"Your résumé hits {self.keyword_match_pct}% of core competencies."
+            self.competitive_edge   = str(s.get("edge", "")) or f"Tailored application optimised for {self.pipeline_company}."
             self.ready_to_apply     = self.critic_score >= 7.0
-            if not self.keyword_match_text:
-                self.keyword_match_text = (
-                    f"Your résumé hits {self.keyword_match_pct}% of core competencies in the JD."
-                )
-            if not self.competitive_edge:
-                self.competitive_edge = (
-                    f"Your tailored application is optimised for {self.pipeline_company}'s requirements."
-                )
         except Exception:
             self.critic_score       = 8.0
             self.keyword_match_pct  = 86
             self.keyword_match_text = "Strong alignment with the role competencies."
             self.competitive_edge   = "Tailored application stands out against generic submissions."
             self.ready_to_apply     = True
-
         self.critic_status = "complete"
         self.critic_msg    = f"Quality review complete — Score: {self.critic_score:.1f}/10"
         yield
 
-        # ── SAVE TO SUPABASE ──────────────────────────────────────
+        # ── SAVE TO SUPABASE ─────────────────────────────────────
         try:
             if not self.user_id:
                 self.form_error = "Session expired. Please login again."
                 yield rx.redirect("/login")
                 return
-
             app_id = save_application(
                 user_id=self.user_id,
                 company=self.pipeline_company,
@@ -529,24 +439,19 @@ class State(rx.State):
     async def load_applications(self):
         self.loading_apps = True
         yield
-
         apps: list = []
         try:
             from autoapply_ai.db.history import get_applications
-
             if not self.user_id:
                 self.applications = []
                 self.loading_apps = False
                 yield
                 return
-
             apps = get_applications(self.user_id) or []
             self.applications = apps
-
         except Exception as e:
             print("LOAD ERROR:", str(e))
             self.applications = []
-
         self.loading_apps = False
         print("DEBUG APPS:", len(apps))
         yield
@@ -554,7 +459,6 @@ class State(rx.State):
     async def update_app_status(self, app_id: str, status: str):
         try:
             from autoapply_ai.db.history import get_applications, update_status
-
             update_status(app_id, status)
             apps = get_applications(self.user_id)
             self.applications = apps or []
@@ -577,46 +481,33 @@ class State(rx.State):
     # ================================================================
 
     def download_resume_docx(self):
-        docx = export_docx(
-            f"{self.pipeline_role} Resume",
-            self.generated_resume,
-        )
-        return rx.download(
-            data=docx,
-            filename=f"{self.pipeline_company}_resume.docx",
-        )
+        docx = export_docx(f"{self.pipeline_role} Resume", self.generated_resume)
+        return rx.download(data=docx, filename=f"{self.pipeline_company}_resume.docx")
 
     def download_cover_letter_docx(self):
-        docx = export_docx(
-            f"{self.pipeline_role} Cover Letter",
-            self.generated_cover_letter,
-        )
-        return rx.download(
-            data=docx,
-            filename=f"{self.pipeline_company}_cover_letter.docx",
-        )
+        docx = export_docx(f"{self.pipeline_role} Cover Letter", self.generated_cover_letter)
+        return rx.download(data=docx, filename=f"{self.pipeline_company}_cover_letter.docx")
 
     # ================================================================
     # PROFILE
     # ================================================================
 
     async def save_profile(self):
+        from autoapply_ai.db.client import get_client
         try:
             res = (
                 get_client()
                 .table("profiles")
-                .upsert(
-                    {
-                        "user_id":      self.user_id,
-                        "full_name":    self.profile_name,
-                        "university":   self.university,
-                        "location":     self.location,
-                        "headline":     self.headline,
-                        "bio":          self.bio,
-                        "linkedin_url": self.linkedin_url,
-                        "github_url":   self.github_url,
-                    }
-                )
+                .upsert({
+                    "user_id":      self.user_id,
+                    "full_name":    self.profile_name,
+                    "university":   self.university,
+                    "location":     self.location,
+                    "headline":     self.headline,
+                    "bio":          self.bio,
+                    "linkedin_url": self.linkedin_url,
+                    "github_url":   self.github_url,
+                })
                 .execute()
             )
             print("PROFILE SAVED:", res.data)
@@ -624,6 +515,7 @@ class State(rx.State):
             print("PROFILE ERROR:", e)
 
     async def load_profile(self):
+        from autoapply_ai.db.client import get_client
         if not self.user_id:
             return
         try:
@@ -650,18 +542,13 @@ class State(rx.State):
     # NAVIGATION HELPERS
     # ================================================================
 
-    def set_tab_tracker(self):
-        self.active_tab = "tracker"
+    def set_tab_tracker(self):  self.active_tab = "tracker"
+    def set_tab_feed(self):     self.active_tab = "feed"
+    def set_tab_assets(self):   self.active_tab = "assets"
 
     def set_tab_apply(self):
         self.active_tab = "apply"
         self.clear_form()
-
-    def set_tab_feed(self):
-        self.active_tab = "feed"
-
-    def set_tab_assets(self):
-        self.active_tab = "assets"
 
     def go_to_assets(self):
         self.active_tab = "assets"
@@ -672,64 +559,43 @@ class State(rx.State):
     # ================================================================
 
     def _clear_session(self):
-        """Wipe all LocalStorage auth state."""
         self.user_id           = ""
         self.user_email        = ""
         self._is_logged_in_str = "false"
         self.applications      = []
 
     async def _validate_session(self) -> bool:
-        """
-        Verify the stored user_id still exists in Supabase.
-        Clears session and returns False if invalid.
-        This prevents stale localStorage from bypassing the guard.
-        """
         if not self.is_logged_in or not self.user_id:
             self._clear_session()
             return False
         try:
             from autoapply_ai.db.client import get_client
-            res = (
-                get_client()
-                .table("profiles")
-                .select("user_id")
-                .eq("user_id", self.user_id)
-                .limit(1)
-                .execute()
-            )
-            # If no profile row yet that's fine — user is valid, just new
+            get_client().table("profiles").select("user_id").eq("user_id", self.user_id).limit(1).execute()
             return True
         except Exception as e:
             print("SESSION VALIDATION ERROR:", e)
-            # On Supabase error, trust the stored token rather than logging out
             return self.is_logged_in
 
     async def guard(self):
-        """Redirect to /login if not authenticated or session is stale."""
         valid = await self._validate_session()
         if not valid:
             yield rx.redirect("/login")
 
     async def guard_and_load(self):
-        """Redirect to /login if stale, or load applications + profile."""
         valid = await self._validate_session()
         if not valid:
             yield rx.redirect("/login")
             return
-
         self.loading_apps = True
         yield
-
         apps: list = []
         try:
             from autoapply_ai.db.history import get_applications
-
             if self.user_id:
                 apps = get_applications(self.user_id) or []
                 self.applications = apps
         except Exception:
             self.applications = []
-
         self.loading_apps = False
         print("LOADED APPS:", len(apps))
         yield

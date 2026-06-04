@@ -3,10 +3,10 @@ autoapply/db/client.py
 Supabase client + auth helpers (synchronous).
 """
 from __future__ import annotations
+import os
 from dotenv import load_dotenv
 load_dotenv()
 
-import os
 from supabase import create_client, Client
 
 _client: Client | None = None
@@ -23,10 +23,7 @@ def get_client() -> Client:
     return _client
 
 
-# ---- Auth ----
-
 def supabase_login(email: str, password: str) -> dict | None:
-    """Sign in and return {user_id, email} or None."""
     try:
         res = get_client().auth.sign_in_with_password({"email": email, "password": password})
         if res.user:
@@ -37,7 +34,6 @@ def supabase_login(email: str, password: str) -> dict | None:
 
 
 def supabase_signup(email: str, password: str) -> dict | None:
-    """Sign up and return {user_id, email} or None."""
     try:
         res = get_client().auth.sign_up({"email": email, "password": password})
         if res.user:
