@@ -3,6 +3,9 @@ autoapply/db/client.py
 Supabase client + auth helpers (synchronous).
 """
 from __future__ import annotations
+from dotenv import load_dotenv
+load_dotenv()
+
 import os
 from supabase import create_client, Client
 
